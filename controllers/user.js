@@ -37,10 +37,10 @@ exports.loginUser = async (req, res, next) =>{
             res.status(404).json({message: "User doesn't exist. Please Sign Up !!"});
         }
         else if(user[0].password !== req.body.password){
-            res.status(403).json({message: "Email or Password is Incorrect. Please try again !!!"});
+            res.status(401).json({message: "Email or Password is Incorrect. Please try again !!!"});
         }
         else{
-            res.json({message: 'Login Successful'});
+            res.json({message: 'User Login Successful'});
         }
     }
     catch(error) {
