@@ -29,3 +29,22 @@ exports.addUser = async (req, res, next) => {
         res.sendStatus(505).json(err);        
     }
 }
+
+exports.loginUser = async (req, res, next) =>{
+    try {
+        const user = await User.findAll({where : {email: req.body.email}});
+        if(user[0] == null){
+            res.status(404).json({message: "User doesn't exist. Please Sign Up !!"});
+        }
+        else if(user[0].password !== req.body.password){
+            res.status(403).json({message: "Email or Password is Incorrect. Please try again !!!"});
+        }
+        else{
+            res.json({message: 'Login Successful'});
+        }
+    }
+    catch(error) {
+        console.log(error);
+        res.sendStatus(505).json(error);
+    }
+}
