@@ -1,27 +1,46 @@
 const Expense = require('../models/expense');
 
-exports.getExpenses = (req, res, next) => {
-    Expense.findAll()
-      .then((expenses) => {
-        res.json(expenses);
-      })
-      .catch((err) => console.log(err));
+function isStringInvalid(string){
+    if(string == undefined || string.length === 0){
+        return true;
+    }
+    else{
+        return false;
+    }
 }
 
-exports.addExpense = (req, res, next) => {
-    const expenseDesc = req.body.description;
-    const expenseAmount = req.body.amount;
-    const expenseCategory = req.body.category;
+exports.getExpenses = async (req, res, next) => {
+    try{
+        const expenses = await Expense.findAll();
+        res.json(expenses);
+    }
+    catch(err){
+        console.log(err);
+        res.sendStatus(500).json(err); 
+    }
+}
+
+exports.addExpense = async (req, res, next) => {
+    try {
+        const expenseDesc = req.body.description;
+        const expenseAmount = req.body.amount;
+        const expenseCategory = req.body.category;
     
-    Expense.create({
-        description: expenseDesc,
-        amount: expenseAmount,
-        category: expenseCategory
-    })
-    .then(result => {
+        if(isStringInvalid(expenseDesc) || isStringInvalid(expenseAmount) || isStringInvalid(expenseCategory)){
+            return res.status(400).json({err : 'Bad Parameters: Something is missing'});
+        }
+        const result = await Expense.create({
+                            description: expenseDesc,
+                            amount: expenseAmount,
+                            category: expenseCategory
+                        });
         res.json(result.dataValues);
-    })
-    .catch(err => console.log(err));
+    }
+    catch(error){
+        console.log(err);
+        res.sendStatus(500).json(err); 
+    }
+        
 }
 
 exports.updateExpense = (req, res, next) => {
@@ -43,14 +62,22 @@ exports.updateExpense = (req, res, next) => {
     .catch(err => console.log(err));
 }
 
-exports.deleteExpense = (req, res, next) => {
-    const expenseId = req.params.expenseId;
-    Expense.findByPk(expenseId)
-    .then(expense => {
-        return expense.destroy();
-    })
-    .then(result => {
-        res.json('');
-    })
-    .catch(err => console.log(err));
+exports.deleteExpense = async (req, res, next) => {
+    try{
+        const expenseId = req.params.expenseId;
+        const expense = await Expense.findByPk(expenseId);
+        if(expense){
+            const deleted = await expense.destroy();
+            if(deleted) {
+                res.status(200).json('Delted Expense Succesfully');
+            }
+        }
+        else{
+            res.status(404).json('Expense object not Found');
+        }
+    }
+    catch(err) {
+        console.log(err);
+        res.sendStatus(500).json(err); 
+    }
 }
