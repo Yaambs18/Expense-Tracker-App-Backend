@@ -12,7 +12,7 @@ exports.addExpense = (req, res, next) => {
     const expenseDesc = req.body.description;
     const expenseAmount = req.body.amount;
     const expenseCategory = req.body.category;
-
+    
     Expense.create({
         description: expenseDesc,
         amount: expenseAmount,

@@ -6,7 +6,7 @@ const router = express.Router();
 
 router.get('/', expenseController.getExpenses);
 
-router.post('/', expenseController.addExpense);
+router.post('/addExpense', expenseController.addExpense);
 
 router.put('/:expenseId', expenseController.updateExpense);
 

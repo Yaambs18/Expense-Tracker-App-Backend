@@ -1,5 +1,4 @@
 const express = require("express");
-const bodyParser = require("body-parser");
 const cors = require("cors");
 
 const sequilize = require("./util/database");
@@ -9,9 +8,9 @@ const userRoutes = require('./routes/user');
 const app = express();
 
 app.use(cors());
-app.use(bodyParser.json({ extended: false }));
+app.use(express.json());
 
-app.use("/expenseData", expenseRoutes);
+app.use("/expense", expenseRoutes);
 app.use('/user', userRoutes);
 
 sequilize
