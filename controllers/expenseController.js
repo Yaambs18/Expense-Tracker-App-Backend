@@ -2,8 +2,6 @@ const jwt = require('jsonwebtoken');
 
 const Expense = require('../models/expense');
 
-const secret = '5d5328271da7ff5830fe552588dad34b1ac3748e1432f079372149c8d55c5d5dcb65d5e0245598443ff7e1aabd2947dd4a1da70440d08f1d99137aed14b58d93';
-
 function isStringInvalid(string){
     if(string == undefined || string.length === 0){
         return true;
@@ -15,10 +13,9 @@ function isStringInvalid(string){
 
 exports.getExpenses = async (req, res, next) => {
     try{
-        const userToken = req.headers.authorization;
-        const tokenData = jwt.verify(userToken, secret);
+        const user = req.user;
 
-        const expenses = await Expense.findAll({ where: { userId: tokenData.userId }});
+        const expenses = await Expense.findAll({ where: { userId: user.id }});
         res.json(expenses);
     }
     catch(err){
@@ -30,7 +27,7 @@ exports.getExpenses = async (req, res, next) => {
 exports.addExpense = async (req, res, next) => {
     try {
         const userToken = req.headers.authorization;
-        const tokenData = jwt.verify(userToken, secret);
+        const tokenData = jwt.verify(userToken, process.env.TOKEN_SECRET);
 
         const expenseDesc = req.body.description;
         const expenseAmount = req.body.amount;

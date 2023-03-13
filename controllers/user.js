@@ -13,11 +13,12 @@ function isStringInvalid(string){
     }
 }
 
-function generateToken(id){
-    return jwt.sign({userId: id}, secret);
+const generateToken = function (id){
+    const user = User.findByPk(id);
+    return jwt.sign({userId: id, name: user.name, isPremiumUser: user.ispremiumuser}, secret);
 }
 
-exports.addUser = async (req, res, next) => {
+const addUser = async (req, res, next) => {
     try {        
         const { name, email, password } = req.body;
 
@@ -39,7 +40,7 @@ exports.addUser = async (req, res, next) => {
     }
 }
 
-exports.loginUser = async (req, res, next) =>{
+const loginUser = async (req, res, next) =>{
     try {
         const { email, password } = req.body;
 
@@ -72,4 +73,10 @@ exports.loginUser = async (req, res, next) =>{
         console.log(error);
         res.sendStatus(500).json(error);
     }
+}
+
+module.exports = {
+    addUser,
+    loginUser,
+    generateToken
 }
