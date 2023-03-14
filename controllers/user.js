@@ -13,8 +13,8 @@ function isStringInvalid(string){
     }
 }
 
-const generateToken = function (id){
-    const user = User.findByPk(id);
+const generateToken = async function (id){
+    const user = await User.findByPk(id);
     return jwt.sign({userId: id, name: user.name, isPremiumUser: user.ispremiumuser}, secret);
 }
 
@@ -51,7 +51,7 @@ const loginUser = async (req, res, next) =>{
         const user = await User.findAll({where : {email: req.body.email}});
         if(user.length > 0){
             console.log(user[0].id);
-            const jwtToken = generateToken(user[0].id);
+            const jwtToken = await generateToken(user[0].id);
             bcrypt.compare(password, user[0].password, (err, result) => {
                 if(err){
                     console.log(error);
