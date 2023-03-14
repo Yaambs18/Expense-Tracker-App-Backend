@@ -10,7 +10,7 @@ router.get('/', authenticatemiddleware.authenticate, expenseController.getExpens
 
 router.post('/addExpense', authenticatemiddleware.authenticate, expenseController.addExpense);
 
-router.put('/:expenseId', expenseController.updateExpense);
+router.put('/:expenseId', authenticatemiddleware.authenticate, expenseController.updateExpense);
 
 router.delete('/:expenseId', authenticatemiddleware.authenticate, expenseController.deleteExpense);
 

@@ -1,6 +1,7 @@
 const jwt = require('jsonwebtoken');
 
 const Expense = require('../models/expense');
+const User = require('../models/user');
 
 function isStringInvalid(string){
     if(string == undefined || string.length === 0){
@@ -42,11 +43,18 @@ exports.addExpense = async (req, res, next) => {
                             category: expenseCategory,
                             userId: tokenData.userId
                         });
+        const user = await User.findByPk(req.user.id)
+        await User.update(
+          {
+            totalExpenseAmount: user.totalExpenseAmount + +expenseAmount,
+          },
+          { where: { id: req.user.id } }
+        );
         res.json(result.dataValues);
     }
     catch(error){
-        console.log(err);
-        res.sendStatus(500).json(err); 
+        console.log(error);
+        res.sendStatus(500).json(error); 
     }
         
 }

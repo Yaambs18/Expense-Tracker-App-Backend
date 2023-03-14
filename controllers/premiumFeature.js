@@ -3,14 +3,13 @@ const User = require('../models/user');
 const sequilize = require('../util/database');
 
 const getLeaderboard = async (req, res, next) => {
-    const expenses = await Expense.findAll({
-      attributes: ['id', "userId", [sequilize.fn('sum', sequilize.col('expense.amount')), 'total_cost']],
-      include: {
-        model: User,
-        attributes: ["id", "name"],
-      },
-      group: ['expense.userId'],
-      order: [['total_cost', 'DESC']]
+    requestUser = await User.findByPk(req.user.id);
+    if(!requestUser.ispremiumuser){
+        res.status(403).json({message: 'You are not a premium user'});
+    }
+    const expenses = await User.findAll({
+      attributes: ['id', "name", 'totalExpenseAmount'],
+      order: [['totalExpenseAmount', 'DESC']]
     });
     console.log(expenses[0].user);
     res.json(expenses);
