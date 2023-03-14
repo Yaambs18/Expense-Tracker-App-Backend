@@ -8,6 +8,7 @@ const sequilize = require("./util/database");
 const expenseRoutes = require('./routes/expenseRoutes');
 const userRoutes = require('./routes/user');
 const purchaseRoutes = require('./routes/purchase');
+const premiumRoutes = require('./routes/premium');
 
 const User = require('./models/user');
 const Expense = require('./models/expense');
@@ -21,6 +22,7 @@ app.use(express.json());
 app.use("/expense", expenseRoutes);
 app.use('/user', userRoutes);
 app.use('/purchase', purchaseRoutes);
+app.use('/premium', premiumRoutes);
 
 User.hasMany(Expense);
 Expense.belongsTo(User, {constraints: true, onDelete: 'CASCADE'});
