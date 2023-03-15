@@ -27,8 +27,8 @@ exports.getExpenses = async (req, res, next) => {
 }
 
 exports.addExpense = async (req, res, next) => {
+    const transaction = await sequilize.transaction();
     try {
-        const transaction = await sequilize.transaction();
         const userToken = req.headers.authorization;
         const tokenData = jwt.verify(userToken, process.env.TOKEN_SECRET);
 
@@ -82,8 +82,8 @@ exports.updateExpense = (req, res, next) => {
 }
 
 exports.deleteExpense = async (req, res, next) => {
+    const transaction = await sequilize.transaction();
     try{
-        const transaction = await sequilize.transaction();
         const user = req.user;
 
         const expenseId = req.params.expenseId;

@@ -14,6 +14,7 @@ const passwordRoutes = require('./routes/password');
 const User = require('./models/user');
 const Expense = require('./models/expense');
 const Order = require('./models/order');
+const ForgotPasswordRequest = require('./models/forgotPasswordRequest');
 
 const app = express();
 
@@ -30,6 +31,8 @@ User.hasMany(Expense);
 Expense.belongsTo(User, {constraints: true, onDelete: 'CASCADE'});
 User.hasMany(Order);
 Order.belongsTo(User, { constraints: true, onDelete: 'CASCADE' });
+User.hasMany(ForgotPasswordRequest);
+ForgotPasswordRequest.belongsTo(User, { constraints: true, onDelete: 'CASCADE'});
 
 sequilize
   .sync()
