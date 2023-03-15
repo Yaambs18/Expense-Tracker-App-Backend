@@ -42,8 +42,9 @@ exports.updatetransactionstatus = async (req, res, next) => {
         const promise1 = order.update({ paymentId: payment_id, status: 'SUCCESSFUL' });
         const promise2 = req.user.update({ ispremiumuser: true });
 
-        Promise.all([promise1, promise2]).then(() => {
-            res.status(202).json({sucess: true, message: "Transaction Successful", token: userController.generateToken(userId)});
+        Promise.all([promise1, promise2]).then(async () => {
+            const userNewToken = await userController.generateToken(userId)
+            res.status(202).json({sucess: true, message: "Transaction Successful", token: userNewToken});
         })
     }
     catch(err){

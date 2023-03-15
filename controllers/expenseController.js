@@ -2,6 +2,7 @@ const jwt = require('jsonwebtoken');
 
 const Expense = require('../models/expense');
 const User = require('../models/user');
+const sequilize = require('../util/database');
 
 function isStringInvalid(string){
     if(string == undefined || string.length === 0){
@@ -27,6 +28,7 @@ exports.getExpenses = async (req, res, next) => {
 
 exports.addExpense = async (req, res, next) => {
     try {
+        const transaction = await sequilize.transaction();
         const userToken = req.headers.authorization;
         const tokenData = jwt.verify(userToken, process.env.TOKEN_SECRET);
 
@@ -42,17 +44,18 @@ exports.addExpense = async (req, res, next) => {
                             amount: expenseAmount,
                             category: expenseCategory,
                             userId: tokenData.userId
-                        });
-        const user = await User.findByPk(req.user.id)
-        await User.update(
+                        }, {transaction: transaction});
+        await req.user.update(
           {
-            totalExpenseAmount: user.totalExpenseAmount + +expenseAmount,
+            totalExpenseAmount: Number(req.user.totalExpenseAmount) + Number(expenseAmount),
           },
-          { where: { id: req.user.id } }
+          { where: { id: req.user.id }, transaction: transaction }
         );
+        await transaction.commit();
         res.json(result.dataValues);
     }
     catch(error){
+        await transaction.rollback();
         console.log(error);
         res.sendStatus(500).json(error); 
     }
@@ -80,15 +83,17 @@ exports.updateExpense = (req, res, next) => {
 
 exports.deleteExpense = async (req, res, next) => {
     try{
-        const userToken = req.headers.authorization;
-        const tokenData = jwt.verify(userToken, secret);
+        const transaction = await sequilize.transaction();
+        const user = req.user;
 
         const expenseId = req.params.expenseId;
-        const expense = await Expense.findByPk(expenseId, { where: { userID: tokenData.userId }});
+        const expense = await Expense.findByPk(expenseId, { where: { userID: user.id }});
         if(expense){
-            const deleted = await expense.destroy();
+            const deleted = await expense.destroy({transaction: transaction});
             if(deleted) {
-                res.status(200).json('Delted Expense Succesfully');
+                await req.user.update( { totalExpenseAmount: Number(req.user.totalExpenseAmount) - Number(expense.amount) },{transaction: transaction})
+                await transaction.commit();
+                res.status(200).json('Deleted Expense Succesfully');
             }
         }
         else{
@@ -96,6 +101,7 @@ exports.deleteExpense = async (req, res, next) => {
         }
     }
     catch(err) {
+        await transaction.rollback();
         console.log(err);
         res.sendStatus(500).json(err); 
     }

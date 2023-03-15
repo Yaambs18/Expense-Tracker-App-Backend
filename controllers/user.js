@@ -2,8 +2,6 @@ const User = require('../models/user');
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 
-const secret = '5d5328271da7ff5830fe552588dad34b1ac3748e1432f079372149c8d55c5d5dcb65d5e0245598443ff7e1aabd2947dd4a1da70440d08f1d99137aed14b58d93';
-
 function isStringInvalid(string){
     if(string == undefined || string.length === 0){
         return true;
@@ -15,7 +13,7 @@ function isStringInvalid(string){
 
 const generateToken = async function (id){
     const user = await User.findByPk(id);
-    return jwt.sign({userId: id, name: user.name, isPremiumUser: user.ispremiumuser}, secret);
+    return jwt.sign({userId: id, name: user.name, isPremiumUser: user.ispremiumuser}, process.env.TOKEN_SECRET);
 }
 
 const addUser = async (req, res, next) => {
