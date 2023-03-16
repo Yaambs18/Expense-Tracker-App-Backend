@@ -14,10 +14,25 @@ function isStringInvalid(string){
 
 exports.getExpenses = async (req, res, next) => {
     try{
+        const ITEMS_PER_PAGE = 10;
         const user = req.user;
 
-        const expenses = await user.getExpenses();
-        res.json(expenses);
+        const page = Number(req.query.page) || 1;
+        const totalCount = await Expense.count();
+        const expenses = await user.getExpenses({
+            offset: (page -1 ) * ITEMS_PER_PAGE,
+            limit: ITEMS_PER_PAGE
+        });
+        
+        res.json({
+            expenses: expenses,
+            currentPage: page,
+            hasNextPage: ITEMS_PER_PAGE * page < totalCount,
+            nextPage: page + 1,
+            hasPreviousPage: page > 1,
+            previousPage: page - 1,
+            lastPage: Math.ceil(totalCount/ITEMS_PER_PAGE)
+        });
     }
     catch(err){
         console.log(err);
