@@ -14,7 +14,7 @@ function isStringInvalid(string){
 
 exports.getExpenses = async (req, res, next) => {
     try{
-        const ITEMS_PER_PAGE = 10;
+        const ITEMS_PER_PAGE = Number(req.query.size) || 10;
         const user = req.user;
 
         const page = Number(req.query.page) || 1;
