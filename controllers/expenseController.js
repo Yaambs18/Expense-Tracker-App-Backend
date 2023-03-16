@@ -1,7 +1,6 @@
 const jwt = require('jsonwebtoken');
 
 const Expense = require('../models/expense');
-const User = require('../models/user');
 const sequilize = require('../util/database');
 
 function isStringInvalid(string){
@@ -17,7 +16,7 @@ exports.getExpenses = async (req, res, next) => {
     try{
         const user = req.user;
 
-        const expenses = await Expense.findAll({ where: { userId: user.id }});
+        const expenses = await user.getExpenses();
         res.json(expenses);
     }
     catch(err){
