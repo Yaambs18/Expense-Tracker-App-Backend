@@ -1,8 +1,8 @@
 const Sequelize = require('sequelize');
 
-const sequilize = new Sequelize('expense-tracker-db', 'root', 'root', {
+const sequilize = new Sequelize(process.env.DATABASE_NAME, process.env.DB_USER, process.env.DB_PASS, {
     dialect: 'mysql',
-    host: 'localhost'
+    host: process.env.DB_HOST
 })
 
 module.exports = sequilize;
