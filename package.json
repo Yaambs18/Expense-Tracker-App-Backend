@@ -11,6 +11,7 @@
   "author": "Yansh",
   "license": "ISC",
   "dependencies": {
+    "aws-sdk": "^2.1336.0",
     "bcrypt": "^5.1.0",
     "body-parser": "^1.20.2",
     "dotenv": "^16.0.3",
