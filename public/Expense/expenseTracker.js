@@ -21,7 +21,7 @@ window.addEventListener('DOMContentLoaded', () => {
         showLeaderBoard();
     }
     
-    axios.get(`http://44.197.193.135:3000/expense?size=${rows}`, { headers: {'Authorization': token }})
+    axios.get(`http://44.197.193.135/expense?size=${rows}`, { headers: {'Authorization': token }})
     .then((response) => {
         for(expenseObj of response.data.expenses){
             showExpensesOnScreen(expenseObj);
@@ -48,7 +48,7 @@ function pagination(resData) {
         nxtBtn.textContent = resData.nextPage;
         div.appendChild(nxtBtn);
         nxtBtn.onclick = () => {
-            axios.get(`http://44.197.193.135:3000/expense?page=${nxtBtn.textContent}&size=${rows}`, { headers: {'Authorization': token }}).then((response) => {
+            axios.get(`http://44.197.193.135/expense?page=${nxtBtn.textContent}&size=${rows}`, { headers: {'Authorization': token }}).then((response) => {
                 expenseList.innerHTML = "";
                 for(expenseObj of response.data.expenses){
                     showExpensesOnScreen(expenseObj);
@@ -67,7 +67,7 @@ function pagination(resData) {
         prvBtn.textContent = resData.previousPage;
         div.appendChild(prvBtn);
         prvBtn.onclick = () => {
-            axios.get(`http://44.197.193.135:3000/expense?page=${prvBtn.textContent}&size=${rows}`, { headers: {'Authorization': token }}).then((response) => {
+            axios.get(`http://44.197.193.135/expense?page=${prvBtn.textContent}&size=${rows}`, { headers: {'Authorization': token }}).then((response) => {
                 expenseList.innerHTML = "";
                 for(expenseObj of response.data.expenses){
                     showExpensesOnScreen(expenseObj);
@@ -115,7 +115,7 @@ function onSubmit(e){
         if(document.querySelector('#submitBtn').value === 'Update'){
             const expenseId = document.querySelector('#expenseId').value;
             axios
-              .put('http://44.197.193.135:3000/expense/'+expenseId, expenseObj, { headers: {'Authorization': token }})
+              .put('http://44.197.193.135/expense/'+expenseId, expenseObj, { headers: {'Authorization': token }})
               .then((response) => {
                 showExpensesOnScreen(response.data);
               })
@@ -126,7 +126,7 @@ function onSubmit(e){
 
         }
         else{
-            axios.post('http://44.197.193.135:3000/expense/addExpense', expenseObj, { headers: {'Authorization': token }})
+            axios.post('http://44.197.193.135/expense/addExpense', expenseObj, { headers: {'Authorization': token }})
             .then((response) => {
                 showExpensesOnScreen(response.data);
             })
@@ -162,7 +162,7 @@ function showExpensesOnScreen(obj){
     delBtn.onclick = () =>{
         if(confirm('Are you sure ?')){
             axios
-              .delete("http://44.197.193.135:3000/expense/" + obj.id, { headers: {'Authorization': localStorage.getItem('token') }})
+              .delete("http://44.197.193.135/expense/" + obj.id, { headers: {'Authorization': localStorage.getItem('token') }})
               .then((response) => expenseList.removeChild(li))
               .catch((err) => console.log(err));
         }
@@ -195,7 +195,7 @@ function showLeaderBoard() {
     inputElement.value = 'Show Leaderboard'
     inputElement.onclick = async() => {
         const token = localStorage.getItem('token')
-        const userLeaderBoardArray = await axios.get('http://44.197.193.135:3000/premium/leaderboard', { headers: {"Authorization" : token} })
+        const userLeaderBoardArray = await axios.get('http://44.197.193.135/premium/leaderboard', { headers: {"Authorization" : token} })
         console.log(userLeaderBoardArray)
         if(userLeaderBoardArray.data.length >0){
             document.getElementById("premiumUser").style.display = 'none';
@@ -213,14 +213,14 @@ function showLeaderBoard() {
 
 document.getElementById('rzp-button1').onclick = async function (e) {
     const token = localStorage.getItem('token');
-    const response = await axios.get('http://44.197.193.135:3000/purchase/premiummembership', { headers: { 'Authorization': token }});
+    const response = await axios.get('http://44.197.193.135/purchase/premiummembership', { headers: { 'Authorization': token }});
     console.log(response);
     var options = 
     {
         "key": response.data.key_id,
         "order_id": response.data.order.id,
         "handler": async function (response) {
-            const result = await axios.post('http://44.197.193.135:3000/purchase/updatetransactionstatus', {
+            const result = await axios.post('http://44.197.193.135/purchase/updatetransactionstatus', {
                 order_id: options.order_id,
                 payment_id: response.razorpay_payment_id,
             }, { headers: {'Authorization': token } })
@@ -240,7 +240,7 @@ document.getElementById('rzp-button1').onclick = async function (e) {
     rzp1.on('payment.failed', async function (response){
         console.log(response);
 
-        await axios.post('http://44.197.193.135:3000/purchase/updatetransactionstatus', {
+        await axios.post('http://44.197.193.135/purchase/updatetransactionstatus', {
                 order_id: options.order_id,
                 payment_id: response.razorpay_payment_id,
             }, { headers: {'Authorization': token } })
@@ -251,7 +251,7 @@ document.getElementById('rzp-button1').onclick = async function (e) {
 
 downloadReport = async function (e) {
     try {
-        const response = await axios.get('http://44.197.193.135:3000/user/download', { headers: { 'Authorization': token }});
+        const response = await axios.get('http://44.197.193.135/user/download', { headers: { 'Authorization': token }});
 
         if(response.status === 201){
             var a = document.createElement('a');
