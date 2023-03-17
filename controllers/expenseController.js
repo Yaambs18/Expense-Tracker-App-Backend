@@ -76,23 +76,30 @@ exports.addExpense = async (req, res, next) => {
         
 }
 
-exports.updateExpense = (req, res, next) => {
-    const expenseId = req.params.expenseId;
-    const updatedExpenseDesc = req.body.description;
-    const updatedExpenseAmount = req.body.amount;
-    const updatedExpenseCategory = req.body.category;
+exports.updateExpense = async (req, res, next) => {
+    try {
+        const user = req.user;
 
-    Expense.findByPk(expenseId)
-    .then(expense => {
-        expense.description = updatedExpenseDesc,
-        expense.amount = updatedExpenseAmount,
-        expense.category = updatedExpenseCategory
-        return expense.save();
-    })
-    .then(result => {
-        res.json(result);
-    })
-    .catch(err => console.log(err));
+        const expenseId = req.params.expenseId;
+        const updatedExpenseDesc = req.body.description;
+        const updatedExpenseAmount = req.body.amount;
+        const updatedExpenseCategory = req.body.category;
+    
+        const expense = await user.getExpenses({ where : { id: expenseId }});
+        if(expense){
+            expense.description = updatedExpenseDesc,
+            expense.amount = updatedExpenseAmount,
+            expense.category = updatedExpenseCategory
+            const result = await expense.save();
+            res.status(200).json({ success: true, message: 'Update Expense Successfully'});
+        }else{
+            res.status(404).json({ success: false, message: 'Not Found'});
+        }
+    }
+    catch(err) {
+        console.log(err);
+        res.sendStatus(500).json(err); 
+    }
 }
 
 exports.deleteExpense = async (req, res, next) => {
