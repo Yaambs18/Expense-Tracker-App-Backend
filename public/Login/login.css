@@ -1,0 +1,24 @@
+#forgotPass{
+    margin: auto;
+    width: 50%;
+  }
+  
+  #signup-form{
+    margin: 4rem auto;
+    width: 50%;
+    margin-bottom: 0.3rem;
+  }
+
+  @media screen and (max-width: 990px) {
+    
+    #forgotPass{
+      margin: auto;
+      width: 90%;
+    }
+
+    #signup-form{
+        margin: 3rem auto;
+        width: 90%;
+        margin-bottom: 0.3rem;
+      }
+  }

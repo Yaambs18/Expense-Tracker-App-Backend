@@ -1,0 +1,58 @@
+#expenses-form{
+    margin: 1rem auto;
+    width: 60%;
+}
+
+#signup-form{
+  margin: 4rem auto;
+  width: 50%;
+  margin-bottom: 1rem;
+}
+
+@media screen and (max-width: 990px) {
+  #expenses-form{
+    margin: 1rem auto;
+    width: 90%;
+  }
+  #signup-form{
+    margin: 3rem auto;
+    width: 90%;
+  }
+}
+
+.error {
+    background: orangered;
+    color: #fff;
+    padding: 5px;
+    margin: 5px;
+  }
+
+  .delete{
+    background: rgb(224, 81, 81);
+    border-radius: 5px;
+    border: 1px;
+    float: right;
+    padding: 2px;
+  }
+
+  .edit{
+    background: #ccc;
+    border-radius: 5px;
+    border: 1px;
+    float: right;
+    padding: 2px;
+    margin-right: 5px;
+  }
+
+  ul{
+    list-style: none;
+  }
+
+  #expenseList li {
+    padding: 5px;
+    background: #182ef08f;
+    margin: 0.5rem auto;
+    border-radius: 10px;
+    color: rgb(28, 230, 79);
+    width: 80%;
+  }

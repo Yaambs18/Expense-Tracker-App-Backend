@@ -37,6 +37,11 @@ app.use('/purchase', purchaseRoutes);
 app.use('/premium', premiumRoutes);
 app.use('/password', passwordRoutes);
 
+app.use((req, res) => {
+  console.log('requested url', req.url);
+  res.sendFile(path.join(__dirname, `public/${req.url}`));
+})
+
 User.hasMany(Expense);
 Expense.belongsTo(User, {constraints: true, onDelete: 'CASCADE'});
 User.hasMany(Order);
