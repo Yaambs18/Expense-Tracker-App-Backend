@@ -3,21 +3,15 @@ const path = require('path');
 const express = require("express");
 const cors = require("cors");
 const dotenv = require('dotenv');
+const mongoose = require('mongoose');
 
 dotenv.config();
 
-const sequilize = require("./util/database");
 const expenseRoutes = require('./routes/expenseRoutes');
 const userRoutes = require('./routes/user');
 const purchaseRoutes = require('./routes/purchase');
 const premiumRoutes = require('./routes/premium');
 const passwordRoutes = require('./routes/password');
-
-const User = require('./models/user');
-const Expense = require('./models/expense');
-const Order = require('./models/order');
-const ForgotPasswordRequest = require('./models/forgotPasswordRequest');
-const FilesDownloaded = require('./models/filesDownloaded');
 
 const app = express();
 
@@ -34,18 +28,10 @@ app.use((req, res) => {
   res.sendFile(path.join(__dirname, `public/${req.url}`));
 })
 
-User.hasMany(Expense);
-Expense.belongsTo(User, {constraints: true, onDelete: 'CASCADE'});
-User.hasMany(Order);
-Order.belongsTo(User, { constraints: true, onDelete: 'CASCADE' });
-User.hasMany(ForgotPasswordRequest);
-ForgotPasswordRequest.belongsTo(User, { constraints: true, onDelete: 'CASCADE'});
-User.hasMany(FilesDownloaded);
-FilesDownloaded.belongsTo(User, { constraints: true, onDelete: 'CASCADE'});
-
-sequilize
-  .sync()
+mongoose
+  .connect(process.env.MONGO_DB_URL)
   .then((result) => {
+    console.log(result);
     app.listen(3000);
   })
   .catch((err) => console.log(err));

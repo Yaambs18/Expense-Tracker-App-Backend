@@ -13,7 +13,7 @@ async function onSubmit(e) {
         password: password.value
     };
     try{
-        const res = await axios.post('http://52.3.225.122/user/signup', userObj);
+        const res = await axios.post('http://localhost:3000/user/signup', userObj);
         if(res.status === 201){
             console.log(res);
             window.location.href = '../Login/login.html';

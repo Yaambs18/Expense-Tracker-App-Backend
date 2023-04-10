@@ -2,6 +2,7 @@ const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 
 const User = require('../models/user');
+const Expense = require('../models/expense');
 const FilesDownloaded = require('../models/filesDownloaded');
 
 const UserServices = require('../services/userServices');
@@ -17,7 +18,7 @@ function isStringInvalid(string){
 }
 
 const generateToken = async function (id){
-    const user = await User.findByPk(id);
+    const user = await User.findById(id);
     return jwt.sign({userId: id, name: user.name, isPremiumUser: user.ispremiumuser}, process.env.TOKEN_SECRET);
 }
 
@@ -30,11 +31,14 @@ const addUser = async (req, res, next) => {
         }
 
         const passHash = await bcrypt.hash(password, 10);
-        await User.create({
+        const user = new User({
             name: name,
             email: email,
-            password: passHash
+            password: passHash,
+            isPremiumUser: false,
+            totalExpenseAmount: 0
         })
+        await user.save();
         res.status(201).json({message: 'Successfully created a new user'});
     }
     catch(err) {
@@ -51,11 +55,11 @@ const loginUser = async (req, res, next) =>{
             return res.status(400).json({err : 'Bad Parameters: Something is missing'});
         }
 
-        const user = await User.findAll({where : {email: req.body.email}});
-        if(user.length > 0){
-            console.log(user[0].id);
-            const jwtToken = await generateToken(user[0].id);
-            bcrypt.compare(password, user[0].password, (err, result) => {
+        const user = await User.findOne({'email': email});
+        if(user){
+            console.log(user._id);
+            const jwtToken = await generateToken(user._id);
+            bcrypt.compare(password, user.password, (err, result) => {
                 if(err){
                     console.log(error);
                     res.sendStatus(500).json(error);
@@ -84,16 +88,17 @@ const downloadExpenseReport = async (req, res, next) => {
         if(!reqUser.ispremiumuser){
             res.status(401).json({ success: false, messasge: 'Unauthorised user'});
         }
-        const userExpenses = await UserServices.getExpenses(req);
+        const userExpenses = await Expense.find({'userId': req.user});
         
         // console.log(userExpenses);
         const stringifiedExpenses = JSON.stringify(userExpenses);
-        const filename = `Expense${reqUser.id}/${new Date()}`;
+        const filename = `Expense${reqUser._id}/${new Date()}`;
         const fileUrl = await S3Services.uploadToS3(stringifiedExpenses, filename);
-        const result = await FilesDownloaded.create({
+        const fileDownloaded = new FilesDownloaded({
             fileUrl: fileUrl,
-            userId: reqUser.id
+            userId: reqUser
         })
+        const result = await fileDownloaded.save();
         res.status(201).json({fileUrl, success: true});
     }
     catch(err) {

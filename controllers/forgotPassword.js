@@ -1,10 +1,8 @@
 const Sib = require('sib-api-v3-sdk');
-const { v4: uuidv4 } = require('uuid');
 const bcrypt = require('bcrypt');
 
 const ForgotPasswordRequest = require('../models/forgotPasswordRequest');
 const User = require('../models/user');
-const sequilize = require('../util/database');
 
 const client = Sib.ApiClient.instance
 
@@ -19,24 +17,19 @@ const sender = {
 }
 
 const sendResetPasswordEmail = async (req, res, next) => {
-    const transaction = await sequilize.transaction();
     try {
         const { email } = req.body;
 
-        const user = await User.findOne({ where: { email: email }});
+        const user = await User.findOne({ 'email': email });
         if(!user){
             res.status(404).json({message: 'Email does not Exist. Please Sign Up!!'});
         }
 
-        const uuid = uuidv4();
-        console.log(uuid);
-
-        await user.createForgotPasswordRequest({
-            id: uuid,
-            isActive: true
-        }, {
-            transaction: transaction
+        const forgotPasswordRequest = new ForgotPasswordRequest({
+            isActive: true,
+            userId: user
         });
+        const forgotpassword = await forgotPasswordRequest.save();
 
         const recievers = [
             {
@@ -44,7 +37,7 @@ const sendResetPasswordEmail = async (req, res, next) => {
             }
         ]
 
-        const resetUrl = `http://localhost:3000/password/resetpassword/${uuid}`;
+        const resetUrl = `http://localhost:3000:3000/password/resetpassword/${forgotpassword._id}`;
         console.log(resetUrl);
         
         const result = await tranEmailApi.sendTransacEmail({
@@ -58,11 +51,9 @@ const sendResetPasswordEmail = async (req, res, next) => {
             <a href="${resetUrl}">Reset Password</a>`
         });
         console.log(result);
-        await transaction.commit();
         res.status(200).json('Password Reset link sent to you email');
     }
     catch(error) {
-        await transaction.rollback();
         console.log(error);
         res.status(500).json({message: 'Something Went Wrong', Error: error});
     }
@@ -70,7 +61,7 @@ const sendResetPasswordEmail = async (req, res, next) => {
 
 const resetPassword = async (req, res, next) => {
     const resetId = req.params.resetId;
-    const forgotpassword = await ForgotPasswordRequest.findByPk(resetId);
+    const forgotpassword = await ForgotPasswordRequest.findById(resetId);
     if(!forgotpassword || !forgotpassword.isActive){
         res.status(404).json({message: 'The password rest link either expired or Does not exist'});
     }
@@ -90,27 +81,19 @@ const resetPassword = async (req, res, next) => {
 }
 
 const updatePassword = async (req, res, next) => {
-    const transaction = sequilize.transaction();
     try{
         const { newpassword } = req.query;
         const resetId = req.params.resetId;
-        const forgotpassword = await ForgotPasswordRequest.findByPk(resetId);
+        const forgotpassword = await ForgotPasswordRequest.findById(resetId);
         if(forgotpassword){
-            const user = await User.findByPk(forgotpassword.userId);
+            const user = await User.findById(forgotpassword.userId);
             if(user) {
                 const passHash = await bcrypt.hash(newpassword, 10);
-                await user.update({
-                    password: passHash
-                }, {
-                    transaction: transaction
-                });
+                user.password = passHash;
+                await user.save();
  
-                await forgotpassword.update({
-                    isActive: false
-                }, {
-                    transaction: transaction
-                });
-                transaction.commit();
+                forgotpassword.isActive = false;
+                await forgotpassword.save();
                 res.status(201).json({message: 'Successfuly update the new password'});
             }
             else{
@@ -119,7 +102,6 @@ const updatePassword = async (req, res, next) => {
         }
     }
     catch(error){
-        transaction.rollback();
         return res.status(403).json({ error, success: false } )
     }
 }

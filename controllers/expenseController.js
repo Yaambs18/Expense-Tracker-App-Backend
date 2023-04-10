@@ -1,7 +1,5 @@
-const jwt = require('jsonwebtoken');
-
 const Expense = require('../models/expense');
-const sequilize = require('../util/database');
+const User = require('../models/user');
 
 function isStringInvalid(string){
     if(string == undefined || string.length === 0){
@@ -14,24 +12,11 @@ function isStringInvalid(string){
 
 exports.getExpenses = async (req, res, next) => {
     try{
-        const ITEMS_PER_PAGE = Number(req.query.size) || 10;
         const user = req.user;
-
-        const page = Number(req.query.page) || 1;
-        const totalCount = await Expense.count();
-        const expenses = await user.getExpenses({
-            offset: (page -1 ) * ITEMS_PER_PAGE,
-            limit: ITEMS_PER_PAGE
-        });
+        const expenses = await Expense.find({'userId': req.user})
         
         res.json({
-            expenses: expenses,
-            currentPage: page,
-            hasNextPage: ITEMS_PER_PAGE * page < totalCount,
-            nextPage: page + 1,
-            hasPreviousPage: page > 1,
-            previousPage: page - 1,
-            lastPage: Math.ceil(totalCount/ITEMS_PER_PAGE)
+            expenses: expenses
         });
     }
     catch(err){
@@ -41,11 +26,7 @@ exports.getExpenses = async (req, res, next) => {
 }
 
 exports.addExpense = async (req, res, next) => {
-    const transaction = await sequilize.transaction();
     try {
-        const userToken = req.headers.authorization;
-        const tokenData = jwt.verify(userToken, process.env.TOKEN_SECRET);
-
         const expenseDesc = req.body.description;
         const expenseAmount = req.body.amount;
         const expenseCategory = req.body.category;
@@ -53,23 +34,21 @@ exports.addExpense = async (req, res, next) => {
         if(isStringInvalid(expenseDesc) || isStringInvalid(expenseAmount) || isStringInvalid(expenseCategory)){
             return res.status(400).json({err : 'Bad Parameters: Something is missing'});
         }
-        const result = await Expense.create({
+        const expense = new Expense({
                             description: expenseDesc,
                             amount: expenseAmount,
                             category: expenseCategory,
-                            userId: tokenData.userId
-                        }, {transaction: transaction});
-        await req.user.update(
+                            userId: req.user
+                        });
+        const result = await expense.save();
+        await User.findByIdAndUpdate(req.user._id,
           {
             totalExpenseAmount: Number(req.user.totalExpenseAmount) + Number(expenseAmount),
-          },
-          { where: { id: req.user.id }, transaction: transaction }
+          }
         );
-        await transaction.commit();
-        res.json(result.dataValues);
+        res.json(result);
     }
     catch(error){
-        await transaction.rollback();
         console.log(error);
         res.sendStatus(500).json(error); 
     }
@@ -85,13 +64,13 @@ exports.updateExpense = async (req, res, next) => {
         const updatedExpenseAmount = req.body.amount;
         const updatedExpenseCategory = req.body.category;
     
-        const expense = await user.getExpenses({ where : { id: expenseId }});
+        const expense = await Expense.findById(expenseId);
         if(expense){
             expense.description = updatedExpenseDesc,
             expense.amount = updatedExpenseAmount,
             expense.category = updatedExpenseCategory
             const result = await expense.save();
-            res.status(200).json({ success: true, message: 'Update Expense Successfully'});
+            res.status(200).json({ success: true, result, message: 'Update Expense Successfully'});
         }else{
             res.status(404).json({ success: false, message: 'Not Found'});
         }
@@ -103,17 +82,15 @@ exports.updateExpense = async (req, res, next) => {
 }
 
 exports.deleteExpense = async (req, res, next) => {
-    const transaction = await sequilize.transaction();
     try{
         const user = req.user;
 
         const expenseId = req.params.expenseId;
-        const expense = await Expense.findByPk(expenseId, { where: { userID: user.id }});
+        const expense = await Expense.findById(expenseId);
         if(expense){
-            const deleted = await expense.destroy({transaction: transaction});
+            const deleted = await Expense.findByIdAndRemove(expenseId);
             if(deleted) {
-                await req.user.update( { totalExpenseAmount: Number(req.user.totalExpenseAmount) - Number(expense.amount) },{transaction: transaction})
-                await transaction.commit();
+                await User.findByIdAndUpdate(req.user, { totalExpenseAmount: Number(req.user.totalExpenseAmount) - Number(expense.amount) })
                 res.status(200).json('Deleted Expense Succesfully');
             }
         }
@@ -122,7 +99,6 @@ exports.deleteExpense = async (req, res, next) => {
         }
     }
     catch(err) {
-        await transaction.rollback();
         console.log(err);
         res.sendStatus(500).json(err); 
     }
