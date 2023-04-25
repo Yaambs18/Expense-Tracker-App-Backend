@@ -270,3 +270,10 @@ downloadReport = async function (e) {
         alert(err);
     }
 }
+
+const logOutBtn = document.getElementById('logOut');
+
+logOutBtn.addEventListener('click', async () => {
+    localStorage.removeItem('token');
+    window.location.href = '../Login/login.html';
+});
