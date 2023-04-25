@@ -37,7 +37,7 @@ const sendResetPasswordEmail = async (req, res, next) => {
             }
         ]
 
-        const resetUrl = `http://https://expense-tracker-t2ho.onrender.com:3000/password/resetpassword/${forgotpassword._id}`;
+        const resetUrl = `https://expense-tracker-t2ho.onrender.com:3000/password/resetpassword/${forgotpassword._id}`;
         console.log(resetUrl);
         
         const result = await tranEmailApi.sendTransacEmail({

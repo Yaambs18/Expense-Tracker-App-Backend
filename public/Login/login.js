@@ -5,7 +5,7 @@ async function login(e) {
         password: e.target.password.value
     };
     try{
-        const res = await axios.post('http://https://expense-tracker-t2ho.onrender.com/user/login', loginDetails);
+        const res = await axios.post('https://expense-tracker-t2ho.onrender.com/user/login', loginDetails);
         if(res.status === 200){
             alert(res.data.message);
             window.localStorage.setItem('token', res.data.token);
@@ -28,7 +28,7 @@ async function forgotPassword(e){
         email: e.target.email.value
     };
     try{
-        const res = await axios.post('http://https://expense-tracker-t2ho.onrender.com/password/forgotpassword', loginDetails);
+        const res = await axios.post('https://expense-tracker-t2ho.onrender.com/password/forgotpassword', loginDetails);
         if(res.status === 200){
             alert(res.data.message);
             window.location.href = './login.html';
