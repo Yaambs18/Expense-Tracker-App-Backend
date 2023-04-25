@@ -15,7 +15,9 @@ const passwordRoutes = require('./routes/password');
 
 const app = express();
 
-app.use(cors());
+app.use(cors({
+  origin: 'https://expense-tracker-t2ho.onrender.com'
+}));
 app.use(express.json());
 
 app.use("/expense", expenseRoutes);
