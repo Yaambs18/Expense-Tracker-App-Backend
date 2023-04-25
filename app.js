@@ -32,6 +32,6 @@ mongoose
   .connect(process.env.MONGO_DB_URL)
   .then((result) => {
     console.log(result);
-    app.listen(3000);
+    app.listen(process.env.PORT || 3000);
   })
   .catch((err) => console.log(err));
